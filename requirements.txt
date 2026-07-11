@@ -1,0 +1,8 @@
+cryptography
+matplotlib
+pandas
+seaborn
+numpy
+pytest
+tabulate
+pyyaml
