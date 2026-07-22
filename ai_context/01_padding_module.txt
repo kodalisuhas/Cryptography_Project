@@ -1,0 +1,34 @@
+# PADDING MODULE CONTEXT
+
+## File Location
+src/utils/padding.py
+
+## Purpose
+PKCS#7 padding for block ciphers (AES uses 16-byte blocks)
+
+## Interface to Implement
+class Padding:
+    @staticmethod
+    def pad(data: bytes, block_size: int = 16) -> bytes:
+        """Apply PKCS#7 padding."""
+    
+    @staticmethod
+    def unpad(data: bytes) -> bytes:
+        """Remove PKCS#7 padding."""
+    
+    @staticmethod
+    def is_padded(data: bytes) -> bool:
+        """Check if padding is valid."""
+
+## PKCS#7 Rules
+1. Padding value = number of padding bytes (1 to block_size)
+2. If data is already multiple of block_size, add FULL block of padding
+3. Example: b"Hello" (5 bytes) -> pad(16) -> add 11 bytes of \x0b
+
+## Error Handling
+- block_size must be 1-255 (raise ValueError)
+- Invalid padding in unpad() (raise ValueError)
+- Empty data in unpad() (raise ValueError)
+
+## No External Dependencies
+- Pure Python implementation

@@ -1,0 +1,49 @@
+# AES MODULE CONTEXT
+
+## File Location
+src/core/aes_cipher.py
+
+## Purpose
+AES encryption/decryption with ECB and CBC modes
+
+## Interface to Implement
+class AESCipher:
+    VALID_KEY_SIZES = [128, 192, 256]
+    VALID_MODES = ['ECB', 'CBC']
+    BLOCK_SIZE = 16
+    
+    def __init__(self, key_size: int, mode: str):
+        """Initialize with key size and mode."""
+    
+    def generate_key(self) -> bytes:
+        """Generate random key (16/24/32 bytes)."""
+    
+    def generate_iv(self) -> bytes:
+        """Generate random 16-byte IV (CBC only)."""
+    
+    def encrypt(self, plaintext: bytes, key: bytes, iv: bytes = None) -> bytes:
+        """Encrypt with AES in specified mode."""
+    
+    def decrypt(self, ciphertext: bytes, key: bytes, iv: bytes = None) -> bytes:
+        """Decrypt with AES in specified mode."""
+
+## Dependencies
+- from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+- from cryptography.hazmat.backends import default_backend
+- from src.utils.padding import Padding
+
+## Key Sizes to Bytes
+- 128-bit -> 16 bytes
+- 192-bit -> 24 bytes
+- 256-bit -> 32 bytes
+
+## Mode Requirements
+- ECB: No IV needed
+- CBC: 16-byte IV required
+
+## Error Handling
+- Invalid key_size -> ValueError
+- Invalid mode -> ValueError
+- CBC without IV -> ValueError
+- Wrong key size -> ValueError
+- Decryption failure -> cryptography.exceptions.InvalidTag
