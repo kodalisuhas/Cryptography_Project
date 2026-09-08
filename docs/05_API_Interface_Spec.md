@@ -1148,66 +1148,77 @@ class Padding:
         
         Args:
             data (bytes): Data to pad
-            block_size (int): Block size in bytes (16 for AES)
+            block_size (int): Block size in bytes (16 for AES, 8 for Blowfish)
             
         Returns:
             bytes: Padded data
             
         Raises:
-            ValueError: If block_size is invalid
+            ValueError: If block_size < 1 or block_size > 255
             
         Example:
-            padded = Padding.pad(b"Hello", 16)
-            # Returns: b"Hello\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b"
+            >>> Padding.pad(b"Hello", 16)
+            b'Hello\\x0b\\x0b\\x0b\\x0b\\x0b\\x0b\\x0b\\x0b\\x0b\\x0b\\x0b'
         """
         pass
     
     @staticmethod
-    def unpad(data: bytes) -> bytes:
+     def unpad(data: bytes, block_size: int = 16) -> bytes:
         """
         Remove PKCS#7 padding from data.
         
         Args:
             data (bytes): Padded data
+            block_size (int): Block size in bytes (16 for AES, 8 for Blowfish)
             
         Returns:
             bytes: Unpadded data
             
         Raises:
-            ValueError: If padding is invalid
+            ValueError: If padding is invalid, data is empty, or padding length > block_size
             
         Example:
-            unpadded = Padding.unpad(padded_data)
-            # Returns: b"Hello"
+            >>> Padding.unpad(b'Hello\\x0b\\x0b\\x0b\\x0b\\x0b\\x0b\\x0b\\x0b\\x0b\\x0b\\x0b', 16)
+            b'Hello'
         """
         pass
     
     @staticmethod
-    def is_padded(data: bytes) -> bool:
+    def is_padded(data: bytes, block_size: int = 16) -> bool:
         """
-        Check if data is properly padded.
+       Check if data has valid PKCS#7 padding.
         
         Args:
             data (bytes): Data to check
+            block_size (int): Block size in bytes
             
         Returns:
-            bool: True if padding is valid
+            bool: True if padding is valid, False otherwise
+            
+        Example:
+            >>> Padding.is_padded(b'Hello\\x0b\\x0b\\x0b\\x0b\\x0b\\x0b\\x0b\\x0b\\x0b\\x0b\\x0b', 16)
+            True
         """
         pass
     
     @staticmethod
-    def get_padding_length(data: bytes) -> int:
+    def get_padding_length(data: bytes, block_size: int = 16) -> int:
         """
-        Get the padding length from padded data.
+         Get the padding length from padded data.
         
         Args:
             data (bytes): Padded data
+            block_size (int): Block size in bytes
             
         Returns:
-            int: Padding length
+            int: Number of padding bytes
             
         Raises:
             ValueError: If padding is invalid
+            
+        Example:
+            >>> Padding.get_padding_length(b'Hello\\x0b\\x0b\\x0b\\x0b\\x0b\\x0b\\x0b\\x0b\\x0b\\x0b\\x0b', 16)
+            11
         """
         pass
 ```
