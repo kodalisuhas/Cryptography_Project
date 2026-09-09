@@ -97,8 +97,7 @@ class AESCipher:
             bytes: Encrypted ciphertext
             
         Raises:
-            ValueError: If key size doesn't match, IV missing for CBC, etc.
-            cryptography.exceptions.InvalidKey: If key is invalid
+            ValueError: If key size doesn't match, key is invalid (wrong type or length), IV missing for CBC, etc.
             
         Example:
             cipher = AESCipher(256, 'CBC')
@@ -121,9 +120,8 @@ class AESCipher:
             bytes: Decrypted plaintext
             
         Raises:
-            ValueError: If key size doesn't match, IV missing for CBC, etc.
-            cryptography.exceptions.InvalidTag: If decryption fails
-            cryptography.exceptions.InvalidKey: If key is invalid
+            ValueError: If key size doesn't match, key is invalid (wrong type or length), IV missing for CBC, padding is invalid, etc.
+            Note: ECB/CBC mode does not expose InvalidTag (authentication tags are only used by AEAD modes such as GCM, which are not part of Task 1.2).
             
         Example:
             cipher = AESCipher(256, 'CBC')
@@ -618,7 +616,7 @@ class PerformanceTimer:
         pass
     
     @staticmethod
-    def measure_time_with_warmup(iterations: int = 5, warmup: int = 2):
+    def measure_time_with_warmup(iterations: int = 30, warmup: int = 5):
         """
         Decorator with warmup and multiple iterations.
         
@@ -630,7 +628,7 @@ class PerformanceTimer:
             Wrapped function that returns (result, stats_dict)
             
         Example:
-            @PerformanceTimer.measure_time_with_warmup(iterations=5)
+            @PerformanceTimer.measure_time_with_warmup(iterations=30)
             def encrypt_data(data):
                 return ciphertext
             
@@ -1828,9 +1826,9 @@ class AlgorithmNotSupportedError(CryptographyError):
    - **Recommendation:** Include contextual metadata fields: `'algorithm'`, `'key_size'`, `'mode'`, and `'timestamp'` directly inside the dictionary returned by `get_metrics()`.
    - **Benefit:** Simplifies bulk CSV ingestion and DataFrame creation in `MetricCollector`.
 
-5. **Increase Default Benchmark Iterations in `PerformanceTimer`**
-   - **Explanation:** 5 iterations with 2 warmup runs remain statistically unstable for sub-millisecond encryption benchmarks.
-   - **Recommendation:** Configure defaults to `iterations=50` and `warmup=5` (or make them dynamic via CLI flag `--iterations`).
+5. **Adopted Default Benchmark Iterations in `PerformanceTimer`**
+   - **Explanation:** 5 iterations with 2 warmup runs were statistically unstable for sub-millisecond encryption benchmarks.
+   - **Resolution:** Configure `PerformanceTimer` defaults to `iterations=30` and `warmup=5` to align with the approved methodology.
    - **Benefit:** Guarantees statistically consistent mean and standard deviation outputs.
 
 6. **Add Session Persistence to `MetricCollector`**

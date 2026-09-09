@@ -234,7 +234,7 @@ Create `.env` file in root directory (for future use):
 PROJECT_NAME="Cryptography_AES_Analysis"
 PYTHONPATH="src"
 LOG_LEVEL="INFO"
-BENCHMARK_ITERATIONS=5
+BENCHMARK_ITERATIONS=30
 ```
 > **Note:** These are optional and not required for basic functionality.
 
@@ -428,9 +428,9 @@ git remote -v
    - **Recommendation:** Add `GitHub Account` under Section 6 Development Tools for collaboration and PR management.
    - **Benefit:** Ensures all team members are properly configured for collaboration before development begins.
 
-6. **Adjust Default Benchmark Iterations in Environment Configuration**
-   - **Explanation:** Setting `BENCHMARK_ITERATIONS=5` is insufficient for statistically stable benchmarking.
-   - **Recommendation:** Update the default configuration in `.env` to `BENCHMARK_ITERATIONS=100` (allowing local override for quick unit runs).
+6. **Adopted Benchmark Iterations in Environment Configuration**
+   - **Explanation:** Using default 5 iterations was statistically insufficient.
+   - **Resolution:** Updated the default configuration in `.env` to `BENCHMARK_ITERATIONS=30` to match the selected experimental methodology.
    - **Benefit:** Yields reliable, statistically sound benchmark curves while filtering out transient OS scheduling spikes.
 
 7. **Refine Test Data Specification for Large Payload Stress Testing**

@@ -45,7 +45,7 @@ This document describes the **methodology** for measuring, analyzing, and evalua
                                │
                                ▼
 ┌ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -┐
-  1. Warmup Phase (2 iterations)                                
+  1. Warmup Phase (5 iterations)                                
   - Runs encryption/decryption without measurement             
   - Ensures CPU cache is warm                                  
   - Avoids cold-start inaccuracies                             
@@ -53,7 +53,7 @@ This document describes the **methodology** for measuring, analyzing, and evalua
                                │
                                ▼
 ┌ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -┐
-  2. Measurement Phase (5 iterations)                          
+  2. Measurement Phase (30 iterations)                         
   For each iteration:                                          
   a. start = time.perf_counter()                               
   b. Execute operation (encrypt/decrypt)                       
@@ -73,9 +73,11 @@ This document describes the **methodology** for measuring, analyzing, and evalua
                                │
                                ▼
 ┌ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -┐
-  4. Outlier Removal (Optional)                                
-  - Remove times > 2 standard deviations from mean             
-  - Ensures OS interrupts don't skew results                   
+  4. Outlier Flagging (Tukey Fences)                           
+  - Calculate Q1, Q3, and IQR                                  
+  - Identify times outside Tukey fences                        
+  - Flag potential outliers (do NOT silently delete)           
+  - Primary stats must be based on raw observations            
 └ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -┘
 ```
 
@@ -361,8 +363,8 @@ Parameters Configurable via `benchmark_config.yaml`:
 ```yaml
 # Benchmark Configuration
 benchmark:
-  iterations: 5                    # Number of test iterations
-  warmup_iterations: 2             # Warmup iterations
+  iterations: 30                   # Number of test iterations
+  warmup_iterations: 5             # Warmup iterations
   data_sizes:
     - 1024                        # 1 KB
     - 10240                       # 10 KB
@@ -447,22 +449,25 @@ $$\text{Confidence Interval} = \text{Mean} \pm \left(1.96 \times \frac{\text{Std
 
 **Interpretation:** We are 95% confident that the true mean falls within this range.
 
-### 5.2 Outlier Detection
+### 5.2 Outlier Methodology
 
-We use **IQR (Interquartile Range)** method to identify outliers:
+We use the **IQR (Interquartile Range) / Tukey Fences** method to identify potential outliers:
 $$\begin{aligned}
 Q_1 &= \text{25th percentile} \\
 Q_3 &= \text{75th percentile} \\
 \text{IQR} &= Q_3 - Q_1 \\
-\text{Lower Bound} &= Q_1 - 1.5 \times \text{IQR} \\
-\text{Upper Bound} &= Q_3 + 1.5 \times \text{IQR}
+\text{Lower Fence} &= Q_1 - 1.5 \times \text{IQR} \\
+\text{Upper Fence} &= Q_3 + 1.5 \times \text{IQR}
 \end{aligned}$$
 
-$$\text{Outlier} = \text{Value} < \text{Lower Bound} \quad \text{OR} \quad \text{Value} > \text{Upper Bound}$$
+$$\text{Potential Outlier} = \text{Value} < \text{Lower Fence} \quad \text{OR} \quad \text{Value} > \text{Upper Fence}$$
 
-**Why Remove Outliers?**
-- System interrupts (antivirus scans, OS updates) can skew results
-- Ensures measurements reflect cryptographic performance, not system noise
+**Outlier Handling Rules:**
+- All 30 measured observations are retained as the primary raw dataset.
+- Potential outliers are **flagged** rather than silently deleted.
+- Primary reported statistics (sample count, mean, median, standard deviation, minimum, maximum, Q1, Q3, IQR) must be based on the raw observations.
+- If the Analysis System performs an IQR-filtered secondary calculation, it must clearly distinguish between raw statistics and filtered statistics.
+- No automatic statistical triggers (such as applying IQR only if SD > 10% of mean) are permitted. IQR is calculated for every sample.
 
 ---
 
@@ -538,10 +543,10 @@ For any experiment, ensure:
 - Same library versions (`requirements.txt` locked)
 - Same system specs documented
 - Same data used for comparisons
-- Multiple iterations ($\ge 5$)
-- Warmup performed ($\ge 2$ iterations)
+- Multiple iterations (30 measured iterations)
+- Warmup performed (5 warmup iterations)
 - Confidence intervals calculated
-- Outliers removed (IQR method)
+- Potential outliers flagged (Tukey fences method; raw observations preserved)
 - Environment noise minimized (close other apps)
 - Results saved (CSV + graphs + logs)
 
@@ -600,10 +605,10 @@ Performance results will be presented as:
 
 ## Recommendations & Methodology Refinements
 
-1. **Increase Benchmark and Warmup Iterations**
-   - **Explanation:** Using 2 warmup runs and 5 measurement iterations is statistically insufficient to filter out thread scheduling preemption and CPU cache misses.
-   - **Recommendation:** Increase to **warmup_iterations: 5–10** and **iterations: 50–100** for production benchmarking.
-   - **Benefit:** Produces statistically reliable standard deviations and prevents erratic results during evaluation.
+1. **Adopted Benchmark Iteration Methodology**
+   - **Explanation:** Using 2 warmup runs and 5 measurement iterations was statistically insufficient to filter out thread scheduling preemption and CPU cache misses.
+   - **Resolution:** The project's selected experimental methodology standardizes on **warmup_iterations: 5** and **iterations: 30**.
+   - **Benefit:** Provides a defensible empirical sample while keeping benchmark runtime practical.
 
 2. **Standardize on `psutil` for Memory Profiling**
    - **Explanation:** Maintaining two memory profiling libraries (`memory_profiler` and `psutil`) creates unnecessary installation complexity and platform inconsistencies.
