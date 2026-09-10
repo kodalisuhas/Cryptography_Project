@@ -6,3 +6,8 @@ data/
 results/ 
 venv/
 .pytest_cache
+*.key
+*.iv
+*.bin
+*.key 
+evidence/ 
