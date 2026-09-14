@@ -1,1 +1,1 @@
-# CLI package 
+# CLI package — Presentation layer over the frozen Service layer.
