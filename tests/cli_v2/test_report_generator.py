@@ -746,3 +746,35 @@ class TestTimestampHelpers:
         dt = datetime(2024, 1, 15, 14, 30, 45, tzinfo=timezone.utc)
         assert _file_timestamp(dt) == "20240115_143045"
 
+
+# ===========================================================================
+# H. Backend Initialization Tests
+# ===========================================================================
+
+
+class TestBackendInitialization:
+    """Verify ReportGenerator module safely initializes the Matplotlib backend."""
+
+    def test_report_generator_forces_agg_backend(self):
+        """Verify ReportGenerator module forces Matplotlib to use the headless Agg backend on import."""
+        import subprocess
+        import sys
+        from pathlib import Path
+        
+        root_dir = str(Path(__file__).parent.parent.parent.absolute())
+        
+        # Run in a clean subprocess to verify the module's own import order contract
+        # without interference from pytest or other test file imports.
+        script = (
+            "import sys\n"
+            f"sys.path.insert(0, r'{root_dir}')\n"
+            "from src.cli_v2.report_generator import ReportGenerator\n"
+            "import matplotlib\n"
+            "print(matplotlib.get_backend().lower())\n"
+        )
+        
+        result = subprocess.run([sys.executable, "-c", script], capture_output=True, text=True)
+        if result.returncode != 0:
+            print("STDERR:", result.stderr)
+        assert result.returncode == 0, f"Subprocess failed: {result.stderr}"
+        assert result.stdout.strip() == "agg"

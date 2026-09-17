@@ -28,6 +28,8 @@ import sys
 from typing import Any
 import webbrowser
 
+import matplotlib
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import pandas as pd
 
