@@ -203,6 +203,45 @@ class TestAnalysisLabCLI:
             assert "FILE-SPECIFIC ENCRYPTION ANALYSIS" in stdout
             assert not mock_browser.called
 
+    def test_wizard_mode_auto_open_affirmative_relative_path(
+        self, tmp_path: Path
+    ) -> None:
+        """Verify affirmative answer to open report in wizard mode resolves relative path and dispatches browser."""
+        target_file = tmp_path / "target.bin"
+        target_file.write_bytes(b"A" * 1024)
+        relative_report = Path("results/reports/rel_report.html")
+
+        result = _sample_analysis_result(target_file)
+
+        inputs = iter([
+            str(target_file),  # Path
+            "y",               # Decryption
+            "n",               # Security
+            "y",               # Auto-open
+        ])
+
+        mock_browser = MagicMock()
+
+        with patch.object(
+            FileAnalysisRunner,
+            "run",
+            return_value=(result, relative_report, 0),
+        ):
+            parser = build_parser()
+            args = parser.parse_args([])
+
+            with patch("sys.stdout", new_callable=io.StringIO):
+                exit_code = run_wizard_mode(
+                    args,
+                    input_func=lambda _: next(inputs),
+                    browser_open=mock_browser,
+                )
+
+            assert exit_code == 0
+            assert mock_browser.called
+            assert mock_browser.call_args[0][0] == relative_report.resolve().as_uri()
+            assert mock_browser.call_args[0][0].startswith("file:///")
+
     def test_wizard_mode_high_volume_warning_cancel(self, tmp_path: Path) -> None:
         """Verify wizard presents volume warning when file > 30 MB and aborts if rejected."""
         large_file = tmp_path / "large.bin"

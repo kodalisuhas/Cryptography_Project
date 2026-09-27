@@ -247,7 +247,7 @@ def run_wizard_mode(
             open_resp = input_func("\nOpen HTML report in web browser? [Y/n]: ").strip().lower()
             if open_resp != "n":
                 try:
-                    browser_open(report_path.as_uri())
+                    browser_open(report_path.resolve().as_uri())
                 except Exception:
                     pass
 

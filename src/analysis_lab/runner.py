@@ -294,7 +294,7 @@ class FileAnalysisRunner:
         # Step 7: Auto-open browser dispatch
         if saved_path is not None and not self.no_open:
             try:
-                self.browser_open(saved_path.as_uri())
+                self.browser_open(saved_path.resolve().as_uri())
             except Exception:
                 # Browser launching failure is non-fatal
                 pass

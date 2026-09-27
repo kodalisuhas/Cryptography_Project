@@ -219,6 +219,35 @@ class TestFileAnalysisRunner:
         assert exit_code == 0
         assert not mock_browser.called
 
+    def test_browser_open_resolves_relative_path(self, tmp_path: Path) -> None:
+        """Verify browser dispatch resolves relative report path to absolute file URI."""
+        target_file = tmp_path / "target.bin"
+        target_file.write_bytes(b"A" * 512)
+
+        mock_perf = MagicMock()
+        mock_perf.return_value.run.return_value = _dummy_config_results()
+
+        relative_report_path = Path("results/reports/relative_test.html")
+        mock_report = MagicMock()
+        mock_report.return_value.save_report.return_value = relative_report_path
+
+        mock_browser = MagicMock()
+
+        runner = FileAnalysisRunner(
+            file_path=target_file,
+            experiment_factory=mock_perf,
+            report_generator_factory=mock_report,
+            browser_open=mock_browser,
+            no_open=False,
+        )
+
+        _, report_path, exit_code = runner.run()
+        assert exit_code == 0
+        assert report_path == relative_report_path
+        assert mock_browser.called
+        assert mock_browser.call_args[0][0] == relative_report_path.resolve().as_uri()
+        assert mock_browser.call_args[0][0].startswith("file:///")
+
     def test_security_diffusion_orchestration(self, tmp_path: Path) -> None:
         """Verify security_enabled=True executes SecurityExperiment and merges metrics."""
         target_file = tmp_path / "target.bin"
