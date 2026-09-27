@@ -103,11 +103,12 @@ class MenuV2:
             print("  4. Security & Cryptanalysis Lab")
             print("  5. View & Generate HTML Reports")
             print("  6. Help & Documentation")
-            print("  7. Exit")
+            print("  7. File-Specific Encryption Analysis")
+            print("  8. Exit")
             print("============================================================")
 
             try:
-                raw = input("Select an option [1-7]: ").strip()
+                raw = input("Select an option [1-8]: ").strip()
             except (EOFError, KeyboardInterrupt):
                 print("\nExiting Cryptography Testing Lab. Goodbye!")
                 break
@@ -116,7 +117,7 @@ class MenuV2:
                 continue
 
             token = raw.lower()
-            if token in ("7", "exit", "quit", "q", "c", "cancel"):
+            if token in ("8", "exit", "quit", "q", "c", "cancel"):
                 print("\nExiting Cryptography Testing Lab. Goodbye!")
                 break
             elif token in ("?", "help"):
@@ -138,8 +139,10 @@ class MenuV2:
                 self.run_report_viewer_wizard()
             elif raw == "6":
                 self.run_help_wizard()
+            elif raw == "7":
+                self.run_file_analysis_wizard()
             else:
-                print("  Invalid option. Please enter a number between 1 and 7 (or '?' for help).")
+                print("  Invalid option. Please enter a number between 1 and 8 (or '?' for help).")
 
     def _handle_single_file_menu(self) -> None:
         """Sub-menu for Single-File operations."""
@@ -1460,3 +1463,29 @@ class MenuV2:
             input("Press Enter to return to Main Menu...")
         except (EOFError, KeyboardInterrupt):
             pass
+
+    # =========================================================================
+    # 9. File-Specific Encryption Analysis Wizard
+    # =========================================================================
+
+    def run_file_analysis_wizard(self) -> None:
+        """Run the File-Specific Encryption Analysis wizard.
+
+        Routes user into the frozen post-V2 Analysis Lab interactive wizard
+        (src.analysis_lab.cli.run_wizard_mode), providing comprehensive 6-config
+        evaluation against an individual file payload with standalone HTML reporting.
+        """
+        print("\n--- File-Specific Encryption Analysis Lab ---")
+        try:
+            from src.analysis_lab.cli import build_parser, run_wizard_mode
+
+            parser = build_parser()
+            args = parser.parse_args([])
+            args.verbose = self._verbose
+            run_wizard_mode(args)
+        except KeyboardInterrupt:
+            print("\n[!] Analysis cancelled by user.")
+            return
+        except (OSError, ValueError, RuntimeError) as exc:
+            ErrorTranslator.display_error(exc, context="File-Specific Analysis", verbose=self._verbose)
+            return
