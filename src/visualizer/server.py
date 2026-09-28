@@ -95,7 +95,8 @@ class VisualizerRequestHandler(BaseHTTPRequestHandler):
                         import subprocess
                         import sys
                         if sys.platform == "win32":
-                            subprocess.Popen(["explorer", str(target)])
+                            import os
+                            os.startfile(str(target))
                         elif sys.platform == "darwin":
                             subprocess.Popen(["open", str(target)])
                         else:
