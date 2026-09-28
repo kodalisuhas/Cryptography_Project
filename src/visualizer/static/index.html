@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cryptography Testing Lab — Live Workflow Visualizer</title>
+    <link rel="stylesheet" href="/visualizer.css">
+</head>
+<body class="theme-dark">
+    <!-- Top Bar -->
+    <header class="top-nav">
+        <div class="brand">
+            <span class="brand-icon">⬢</span>
+            <div class="brand-text">
+                <span class="brand-title">CRYPTOGRAPHY TESTING LAB</span>
+                <span class="brand-sub">LIVE WORKFLOW VISUALIZER</span>
+            </div>
+        </div>
+
+        <div class="nav-modes">
+            <button class="mode-btn active" data-mode="single">Single-File</button>
+            <button class="mode-btn" data-mode="decrypt">Decryption</button>
+            <button class="mode-btn" data-mode="batch">Batch Operations</button>
+            <button class="mode-btn" data-mode="benchmark">Benchmark</button>
+            <button class="mode-btn" data-mode="security">Security Lab</button>
+            <button class="mode-btn" data-mode="file_lab">File Lab</button>
+        </div>
+
+        <div class="nav-actions">
+            <div id="statusPill" class="status-pill status-idle">
+                <span class="status-dot"></span>
+                <span id="statusText">IDLE</span>
+            </div>
+            <button id="explainToggleBtn" class="action-btn explain-btn">📖 Explain Mode</button>
+            <button id="shutdownBtn" class="action-btn exit-btn" title="Stop visualizer server and return to V2 menu">Exit to Menu</button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="main-layout">
+        <!-- Center Stage: Pipeline & Execution -->
+        <section class="stage-section">
+            <div class="stage-header">
+                <div class="stage-meta">
+                    <h2 id="stageTitle">Single-File Encryption & Verification</h2>
+                    <p id="stageSubtitle">Visualizing in-memory encryption, sidecar generation, and round-trip verification.</p>
+                </div>
+                <div class="stage-controls">
+                    <!-- Dynamic Mode Controls injected by JS -->
+                    <div id="modeControls" class="mode-controls"></div>
+                    <button id="runBtn" class="run-btn">
+                        <span class="btn-text">▶ Execute Workflow</span>
+                        <span class="btn-spinner"></span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Pipeline Diagram Area -->
+            <div class="pipeline-container">
+                <div class="pipeline-flow" id="pipelineFlow">
+                    <!-- Nodes injected dynamically per active mode -->
+                </div>
+            </div>
+
+            <!-- Telemetry Output Cards -->
+            <div class="telemetry-panel">
+                <div class="panel-header">
+                    <span class="panel-title">REAL-TIME TELEMETRY STREAM</span>
+                    <span class="panel-badge">LIVE METRICS</span>
+                </div>
+                <div class="telemetry-grid" id="telemetryGrid">
+                    <!-- Telemetry cards rendered dynamically -->
+                </div>
+                <div id="reportActionContainer" style="margin-top: 16px; text-align: center; display: none;">
+                    <button id="openReportBtn" class="report-btn">📄 Open HTML Report</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Explain Mode Slide-out Drawer -->
+        <aside id="explainDrawer" class="explain-drawer closed">
+            <div class="drawer-header">
+                <div class="drawer-title">
+                    <span class="drawer-icon">📖</span>
+                    <span id="explainTitle">Component Architecture</span>
+                </div>
+                <button id="closeDrawerBtn" class="close-btn">&times;</button>
+            </div>
+            <div class="drawer-content" id="explainContent">
+                <p class="drawer-hint">Click any node in the pipeline above to inspect its cryptographic invariants, timing boundaries, and mathematical formulations.</p>
+            </div>
+        </aside>
+    </main>
+
+    <!-- Bottom Status Bar -->
+    <footer class="footer-bar">
+        <div class="footer-left">
+            <span>Server: <strong id="serverUrl">127.0.0.1</strong></span>
+            <span class="separator">|</span>
+            <span>Security: <strong>Zero External Dependencies (Air-Gapped)</strong></span>
+        </div>
+        <div class="footer-right">
+            <span>Backend: <strong>Frozen V1/V2 Cryptography Baseline</strong></span>
+        </div>
+    </footer>
+
+    <script src="/visualizer.js"></script>
+</body>
+</html>

@@ -104,11 +104,12 @@ class MenuV2:
             print("  5. View & Generate HTML Reports")
             print("  6. Help & Documentation")
             print("  7. File-Specific Encryption Analysis")
-            print("  8. Exit")
+            print("  8. Live Cryptography Workflow")
+            print("  9. Exit")
             print("============================================================")
 
             try:
-                raw = input("Select an option [1-8]: ").strip()
+                raw = input("Select an option [1-9]: ").strip()
             except (EOFError, KeyboardInterrupt):
                 print("\nExiting Cryptography Testing Lab. Goodbye!")
                 break
@@ -117,7 +118,7 @@ class MenuV2:
                 continue
 
             token = raw.lower()
-            if token in ("8", "exit", "quit", "q", "c", "cancel"):
+            if token in ("9", "exit", "quit", "q", "c", "cancel"):
                 print("\nExiting Cryptography Testing Lab. Goodbye!")
                 break
             elif token in ("?", "help"):
@@ -141,8 +142,10 @@ class MenuV2:
                 self.run_help_wizard()
             elif raw == "7":
                 self.run_file_analysis_wizard()
+            elif raw == "8":
+                self.run_live_workflow_wizard()
             else:
-                print("  Invalid option. Please enter a number between 1 and 8 (or '?' for help).")
+                print("  Invalid option. Please enter a number between 1 and 9 (or '?' for help).")
 
     def _handle_single_file_menu(self) -> None:
         """Sub-menu for Single-File operations."""
@@ -1488,4 +1491,47 @@ class MenuV2:
             return
         except (OSError, ValueError, RuntimeError) as exc:
             ErrorTranslator.display_error(exc, context="File-Specific Analysis", verbose=self._verbose)
+            return
+
+    # =========================================================================
+    # 10. Live Cryptography Workflow Visualizer Wizard
+    # =========================================================================
+
+    def run_live_workflow_wizard(self) -> None:
+        """Launch the Live Cryptography Workflow Visualizer local server and browser interface."""
+        print("\n--- Live Cryptography Workflow Visualizer ---")
+        try:
+            from src.visualizer.server import VisualizerServer
+            server = VisualizerServer()
+            server.start()
+
+            url = server.server_url
+            print(f"\n[*] Visualizer server active at: {url}")
+            print("[*] Launching web browser interface...")
+
+            try:
+                import webbrowser
+                webbrowser.open(url)
+            except Exception:
+                pass
+
+            print("\n============================================================")
+            print(f"  Live Visualizer running at {url}")
+            print("  Press Enter or enter 'q' to stop server and return to menu.")
+            print("============================================================")
+
+            try:
+                input("\nEnter 'q' to return: ")
+            except (EOFError, KeyboardInterrupt):
+                pass
+            finally:
+                print("[*] Stopping visualizer server...")
+                server.shutdown()
+                print("[+] Visualizer server stopped cleanly.")
+
+        except KeyboardInterrupt:
+            print("\n[!] Operation cancelled by user.")
+            return
+        except (OSError, ValueError, RuntimeError) as exc:
+            ErrorTranslator.display_error(exc, context="Live Workflow Visualizer", verbose=self._verbose)
             return

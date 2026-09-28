@@ -74,11 +74,11 @@ def clean_menu(tmp_path, monkeypatch):
 
 
 class TestMainMenuRouting:
-    """Verify top-level main menu rendering, routing to all 8 options, and exits."""
+    """Verify top-level main menu rendering, routing to all 9 options, and exits."""
 
     def test_main_menu_exit_options(self, monkeypatch, capsys):
-        """Main menu cleanly exits on '8', 'exit', 'quit', 'c', 'cancel', EOFError, KeyboardInterrupt."""
-        for exit_token in ["8", "exit", "quit", "c", "cancel"]:
+        """Main menu cleanly exits on '9', 'exit', 'quit', 'q', 'c', 'cancel', EOFError, KeyboardInterrupt."""
+        for exit_token in ["9", "exit", "quit", "q", "c", "cancel"]:
             menu = MenuV2()
             monkeypatch.setattr("builtins.input", MockInput([exit_token]))
             menu.display_main_menu()
@@ -102,7 +102,7 @@ class TestMainMenuRouting:
     def test_main_menu_help_token(self, monkeypatch, capsys):
         """Entering '?' or 'help' at main menu triggers help and re-prompts."""
         menu = MenuV2()
-        monkeypatch.setattr("builtins.input", MockInput(["?", "", "8"]))
+        monkeypatch.setattr("builtins.input", MockInput(["?", "", "9"]))
         menu.display_main_menu()
         out = capsys.readouterr().out
         assert "CRYPTOGRAPHY TESTING LAB — V2 HELP" in out
@@ -111,7 +111,7 @@ class TestMainMenuRouting:
     def test_main_menu_back_token(self, monkeypatch, capsys):
         """Entering 'b' or 'back' at main menu informs user they are at top level."""
         menu = MenuV2()
-        monkeypatch.setattr("builtins.input", MockInput(["b", "8"]))
+        monkeypatch.setattr("builtins.input", MockInput(["b", "9"]))
         menu.display_main_menu()
         out = capsys.readouterr().out
         assert "(Already at main menu)" in out
@@ -119,13 +119,13 @@ class TestMainMenuRouting:
     def test_main_menu_invalid_choice_reprompts(self, monkeypatch, capsys):
         """Entering invalid option at main menu displays friendly error and reprompts."""
         menu = MenuV2()
-        monkeypatch.setattr("builtins.input", MockInput(["99", "abc", "8"]))
+        monkeypatch.setattr("builtins.input", MockInput(["99", "abc", "9"]))
         menu.display_main_menu()
         out = capsys.readouterr().out
-        assert "Invalid option. Please enter a number between 1 and 8" in out
+        assert "Invalid option. Please enter a number between 1 and 9" in out
 
     def test_main_menu_routes_to_all_wizards(self, monkeypatch):
-        """Verify main menu dispatches correctly to all 6 workflows, analysis lab, and help/report views."""
+        """Verify main menu dispatches correctly to all 6 workflows, analysis lab, visualizer, and help/report views."""
         menu = MenuV2()
 
         # Mock all wizard methods
@@ -138,51 +138,57 @@ class TestMainMenuRouting:
         menu.run_report_viewer_wizard = MagicMock()
         menu.run_help_wizard = MagicMock()
         menu.run_file_analysis_wizard = MagicMock()
+        menu.run_live_workflow_wizard = MagicMock()
 
         # 1. Single File Encrypt (1 -> 1)
-        monkeypatch.setattr("builtins.input", MockInput(["1", "1", "8"]))
+        monkeypatch.setattr("builtins.input", MockInput(["1", "1", "9"]))
         menu.display_main_menu()
         menu.run_single_encrypt_wizard.assert_called_once()
 
         # 2. Single File Decrypt (1 -> 2)
-        monkeypatch.setattr("builtins.input", MockInput(["1", "2", "8"]))
+        monkeypatch.setattr("builtins.input", MockInput(["1", "2", "9"]))
         menu.display_main_menu()
         menu.run_single_decrypt_wizard.assert_called_once()
 
         # 3. Batch Encrypt (2 -> 1)
-        monkeypatch.setattr("builtins.input", MockInput(["2", "1", "8"]))
+        monkeypatch.setattr("builtins.input", MockInput(["2", "1", "9"]))
         menu.display_main_menu()
         menu.run_batch_encrypt_wizard.assert_called_once()
 
         # 4. Batch Decrypt (2 -> 2)
-        monkeypatch.setattr("builtins.input", MockInput(["2", "2", "8"]))
+        monkeypatch.setattr("builtins.input", MockInput(["2", "2", "9"]))
         menu.display_main_menu()
         menu.run_batch_decrypt_wizard.assert_called_once()
 
         # 5. Benchmark (3)
-        monkeypatch.setattr("builtins.input", MockInput(["3", "8"]))
+        monkeypatch.setattr("builtins.input", MockInput(["3", "9"]))
         menu.display_main_menu()
         menu.run_benchmark_wizard.assert_called_once()
 
         # 6. Security (4)
-        monkeypatch.setattr("builtins.input", MockInput(["4", "8"]))
+        monkeypatch.setattr("builtins.input", MockInput(["4", "9"]))
         menu.display_main_menu()
         menu.run_security_wizard.assert_called_once()
 
         # 7. Report Viewer (5)
-        monkeypatch.setattr("builtins.input", MockInput(["5", "8"]))
+        monkeypatch.setattr("builtins.input", MockInput(["5", "9"]))
         menu.display_main_menu()
         menu.run_report_viewer_wizard.assert_called_once()
 
         # 8. Help (6)
-        monkeypatch.setattr("builtins.input", MockInput(["6", "8"]))
+        monkeypatch.setattr("builtins.input", MockInput(["6", "9"]))
         menu.display_main_menu()
         menu.run_help_wizard.assert_called_once()
 
         # 9. File-Specific Encryption Analysis (7)
-        monkeypatch.setattr("builtins.input", MockInput(["7", "8"]))
+        monkeypatch.setattr("builtins.input", MockInput(["7", "9"]))
         menu.display_main_menu()
         menu.run_file_analysis_wizard.assert_called_once()
+
+        # 10. Live Cryptography Workflow Visualizer (8)
+        monkeypatch.setattr("builtins.input", MockInput(["8", "9"]))
+        menu.display_main_menu()
+        menu.run_live_workflow_wizard.assert_called_once()
 
     def test_run_file_analysis_wizard_invokes_cli(self, monkeypatch, capsys):
         """Verify run_file_analysis_wizard dispatches to src.analysis_lab.cli.run_wizard_mode."""
@@ -228,6 +234,61 @@ class TestMainMenuRouting:
         with patch("src.analysis_lab.cli.run_wizard_mode", side_effect=TypeError("programming bug")):
             with pytest.raises(TypeError, match="programming bug"):
                 menu.run_file_analysis_wizard()
+
+    def test_run_live_workflow_wizard_normal_lifecycle(self, monkeypatch, capsys):
+        """Verify run_live_workflow_wizard starts server, opens browser, and shuts down on 'q'."""
+        menu = MenuV2()
+        monkeypatch.setattr("builtins.input", MockInput(["q"]))
+
+        mock_server = MagicMock()
+        mock_server.server_url = "http://127.0.0.1:8765"
+
+        with patch("src.visualizer.server.VisualizerServer", return_value=mock_server), \
+             patch("webbrowser.open") as mock_browser:
+            menu.run_live_workflow_wizard()
+
+            mock_server.start.assert_called_once()
+            mock_browser.assert_called_once_with("http://127.0.0.1:8765")
+            mock_server.shutdown.assert_called_once()
+
+        out = capsys.readouterr().out
+        assert "Live Cryptography Workflow Visualizer" in out
+        assert "Visualizer server active at: http://127.0.0.1:8765" in out
+        assert "Visualizer server stopped cleanly." in out
+
+    def test_run_live_workflow_wizard_keyboard_interrupt(self, monkeypatch, capsys):
+        """Verify run_live_workflow_wizard handles KeyboardInterrupt gracefully and shuts down server."""
+        menu = MenuV2()
+        monkeypatch.setattr("builtins.input", lambda prompt="": (_ for _ in ()).throw(KeyboardInterrupt))
+
+        mock_server = MagicMock()
+        mock_server.server_url = "http://127.0.0.1:8765"
+
+        with patch("src.visualizer.server.VisualizerServer", return_value=mock_server):
+            menu.run_live_workflow_wizard()
+            mock_server.shutdown.assert_called_once()
+
+        out = capsys.readouterr().out
+        assert "Visualizer server stopped cleanly." in out
+
+    def test_run_live_workflow_wizard_expected_exception_handling(self, monkeypatch):
+        """Verify run_live_workflow_wizard routes expected exceptions through ErrorTranslator."""
+        menu = MenuV2()
+
+        for exc_type in (OSError("bind error"), ValueError("bad param"), RuntimeError("server error")):
+            with patch("src.visualizer.server.VisualizerServer", side_effect=exc_type):
+                with patch("src.cli_v2.error_translator.ErrorTranslator.display_error") as mock_error:
+                    menu.run_live_workflow_wizard()
+                    mock_error.assert_called_once()
+                    assert mock_error.call_args[1]["context"] == "Live Workflow Visualizer"
+
+    def test_run_live_workflow_wizard_programming_defect_propagates(self):
+        """Verify unexpected programming defects propagate unmasked."""
+        menu = MenuV2()
+
+        with patch("src.visualizer.server.VisualizerServer", side_effect=TypeError("programming bug")):
+            with pytest.raises(TypeError, match="programming bug"):
+                menu.run_live_workflow_wizard()
 
 
 # =============================================================================
