@@ -193,9 +193,9 @@ class TestTelemetryBridge:
         bridge._run_single({"algorithm": "AES", "key_size": 256, "mode": "CBC", "file_path": str(test_file)})
 
         enc_dir = OUTPUTS_DIR / "encryption"
-        assert (enc_dir / f"{test_file.stem}.enc").exists()
-        assert (enc_dir / f"{test_file.stem}.enc.key").exists()
-        assert (enc_dir / f"{test_file.stem}.enc.iv").exists()
+        assert (enc_dir / f"{test_file.name}.enc").exists()
+        assert (enc_dir / f"{test_file.name}.enc.key").exists()
+        assert (enc_dir / f"{test_file.name}.enc.iv").exists()
 
     def test_artifact_collision_safety(self) -> None:
         """Trigger encryption twice for same input, assert _1 suffix."""
@@ -213,15 +213,15 @@ class TestTelemetryBridge:
         bridge._run_single({"algorithm": "AES", "key_size": 256, "mode": "CBC", "file_path": str(test_file)})
         enc_dir = OUTPUTS_DIR / "encryption"
 
-        assert (enc_dir / f"{test_file.stem}.enc").exists()
-        assert not (enc_dir / f"{test_file.stem}_1.enc").exists()
+        assert (enc_dir / f"{test_file.name}.enc").exists()
+        assert not (enc_dir / f"{test_file.stem}_1{test_file.suffix}.enc").exists()
 
         # Second pass
         bridge._run_single({"algorithm": "AES", "key_size": 256, "mode": "CBC", "file_path": str(test_file)})
 
-        assert (enc_dir / f"{test_file.stem}_1.enc").exists()
-        assert (enc_dir / f"{test_file.stem}_1.enc.key").exists()
-        assert (enc_dir / f"{test_file.stem}_1.enc.iv").exists()
+        assert (enc_dir / f"{test_file.stem}_1{test_file.suffix}.enc").exists()
+        assert (enc_dir / f"{test_file.stem}_1{test_file.suffix}.enc.key").exists()
+        assert (enc_dir / f"{test_file.stem}_1{test_file.suffix}.enc.iv").exists()
 
     def test_e2e_decryption_lifecycle_cbc(self) -> None:
         """Trigger explicit CBC decryption."""
@@ -236,14 +236,14 @@ class TestTelemetryBridge:
         bridge._run_single({"algorithm": "AES", "key_size": 256, "mode": "CBC", "file_path": str(test_file)})
 
         enc_dir = OUTPUTS_DIR / "encryption"
-        enc_path = enc_dir / f"{test_file.stem}.enc"
-        key_path = enc_dir / f"{test_file.stem}.enc.key"
-        iv_path = enc_dir / f"{test_file.stem}.enc.iv"
+        enc_path = enc_dir / f"{test_file.name}.enc"
+        key_path = enc_dir / f"{test_file.name}.enc.key"
+        iv_path = enc_dir / f"{test_file.name}.enc.iv"
 
         bridge._run_decrypt({"algorithm": "AES", "key_size": 256, "mode": "CBC", "enc_path": str(enc_path), "key_path": str(key_path), "iv_path": str(iv_path)})
 
         dec_dir = OUTPUTS_DIR / "decryption"
-        dec_path = dec_dir / f"{test_file.stem}.decrypted.bin"
+        dec_path = dec_dir / f"{test_file.name}"
         assert dec_path.exists()
         assert dec_path.read_bytes() == b"CBC decrypt payload"
 
@@ -260,12 +260,12 @@ class TestTelemetryBridge:
         bridge._run_single({"algorithm": "AES", "key_size": 256, "mode": "ECB", "file_path": str(test_file)})
 
         enc_dir = OUTPUTS_DIR / "encryption"
-        enc_path = enc_dir / f"{test_file.stem}.enc"
-        key_path = enc_dir / f"{test_file.stem}.enc.key"
+        enc_path = enc_dir / f"{test_file.name}.enc"
+        key_path = enc_dir / f"{test_file.name}.enc.key"
 
         bridge._run_decrypt({"algorithm": "AES", "key_size": 256, "mode": "ECB", "enc_path": str(enc_path), "key_path": str(key_path), "iv_path": "anything (ignored)"})
 
         dec_dir = OUTPUTS_DIR / "decryption"
-        dec_path = dec_dir / f"{test_file.stem}.decrypted.bin"
+        dec_path = dec_dir / f"{test_file.name}"
         assert dec_path.exists()
         assert dec_path.read_bytes() == b"ECB decrypt payload"

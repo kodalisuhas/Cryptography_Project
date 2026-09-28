@@ -141,13 +141,15 @@ class TelemetryBridge:
 
     def _allocate_artifact_stem(self, dest_dir: Path, basename: str) -> str:
         dest_dir.mkdir(parents=True, exist_ok=True)
-        stem = Path(basename).stem
+        stem = basename
         if not (dest_dir / f"{stem}.enc").exists() and not (dest_dir / f"{stem}.key").exists() and not (dest_dir / f"{stem}.iv").exists():
             return stem
 
         counter = 1
+        b_stem = Path(basename).stem
+        b_ext = Path(basename).suffix
         while True:
-            candidate = f"{stem}_{counter}"
+            candidate = f"{b_stem}_{counter}{b_ext}"
             if not (dest_dir / f"{candidate}.enc").exists() and not (dest_dir / f"{candidate}.key").exists() and not (dest_dir / f"{candidate}.iv").exists():
                 return candidate
             counter += 1
@@ -341,14 +343,23 @@ class TelemetryBridge:
         elapsed_ms = (time.perf_counter() - t0) * 1000.0
 
         dec_dir = OUTPUTS_DIR / "decryption"
-        original_stem = enc_path.stem
-        # Remove `.enc` if it exists to get original stem
-        if original_stem.endswith(".enc"):
-            original_stem = original_stem[:-4]
+        dec_dir.mkdir(parents=True, exist_ok=True)
 
-        # We don't know original extension, use .decrypted.bin
-        stem = self._allocate_artifact_stem(dec_dir, original_stem)
-        plaintext_path = dec_dir / f"{stem}.decrypted.bin"
+        original_name = enc_path.name
+        if original_name.lower().endswith(".enc"):
+            suggested_name = original_name[:-4]
+        else:
+            suggested_name = f"{original_name}.dec"
+
+        plaintext_path = dec_dir / suggested_name
+        counter = 1
+        while plaintext_path.exists():
+            suggested_stem = Path(suggested_name).stem
+            suggested_ext = Path(suggested_name).suffix
+            new_name = f"{suggested_stem}_{counter}{suggested_ext}"
+            plaintext_path = dec_dir / new_name
+            counter += 1
+
         plaintext_path.write_bytes(dec_bytes)
 
         self.emit("decrypt", "STAGE_COMPLETE", "COMPLETE", {
